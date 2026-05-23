@@ -1,0 +1,185 @@
+:root {
+  --bg-top: #fff5fb;
+  --bg-bot: #ffd6e9;
+  --pink:   #ff9ecd;
+  --pink-d: #e67aa9;
+  --text:   #5a3a4a;
+  --card:   #ffffffee;
+  --shadow: 0 8px 24px rgba(120, 60, 90, 0.18);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+               "PingFang TC", "Microsoft JhengHei", "Helvetica Neue",
+               Arial, sans-serif;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bot));
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) 8px env(safe-area-inset-bottom);
+}
+
+/* HUD */
+#hud {
+  width: 100%;
+  max-width: 480px;
+  padding: 8px 12px 6px;
+}
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pill {
+  background: #ffffffcc;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+.pill strong { font-size: 18px; margin-left: 4px; color: var(--pink-d); }
+
+/* 舞台與 canvas */
+#stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+#game {
+  display: block;
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  touch-action: none;
+}
+
+/* Overlay 卡片（開始 / Game Over） */
+.overlay {
+  position: absolute; inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 240, 248, 0.55);
+  backdrop-filter: blur(4px);
+  border-radius: 22px;
+  padding: 18px;
+}
+.overlay.hidden { display: none; }
+.card {
+  background: var(--card);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 22px 22px 18px;
+  text-align: center;
+  width: min(360px, 92%);
+}
+.card h1 {
+  margin: 0 0 4px;
+  font-size: 26px;
+  color: var(--pink-d);
+}
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 22px;
+  color: var(--pink-d);
+}
+.card .sub { margin: 0 0 12px; opacity: 0.7; }
+.card .big { font-size: 20px; margin: 8px 0; }
+.card .big strong { color: var(--pink-d); font-size: 28px; margin: 0 4px; }
+.card p { margin: 6px 0; }
+
+.how {
+  text-align: left;
+  margin: 8px auto 16px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.how b { color: var(--pink-d); }
+
+button.primary {
+  background: linear-gradient(180deg, #ffb3d6, var(--pink));
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 26px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 var(--pink-d), 0 6px 14px rgba(230,122,169,0.35);
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+button.primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--pink-d), 0 4px 8px rgba(230,122,169,0.35);
+}
+.tip { font-size: 12px; opacity: 0.6; margin-top: 12px; }
+
+.hidden { display: none !important; }
+
+/* Perfect 提示飄字 */
+#perfect-pop {
+  position: absolute;
+  top: 22%;
+  left: 50%;
+  transform: translate(-50%, 0) scale(0.7);
+  background: #fffae0;
+  color: #d18a00;
+  border: 2px solid #ffd86b;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-weight: 800;
+  font-size: 18px;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: 0 6px 14px rgba(220,170,40,0.3);
+}
+#perfect-pop.show {
+  animation: pop 0.7s ease-out forwards;
+}
+@keyframes pop {
+  0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.7); }
+  30%  { opacity: 1; transform: translate(-50%, -10px) scale(1.15); }
+  60%  { opacity: 1; transform: translate(-50%, -16px) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -40px) scale(1.0); }
+}
+
+#new-high {
+  color: #d18a00;
+  font-weight: 800;
+  background: #fffae0;
+  border-radius: 999px;
+  padding: 4px 12px;
+  display: inline-block;
+}
+
+#foot {
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  opacity: 0.5;
+  padding: 4px 0 6px;
+}
+
+/* PWA standalone（已加到主畫面）時去除頁尾空間 */
+@media all and (display-mode: standalone) {
+  #foot { display: none; }
+}
