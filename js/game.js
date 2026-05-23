@@ -143,13 +143,16 @@ const Game = (() => {
   }
 
   function updateCamera() {
-    const topY = Physics.topScoopY();
-    // 想讓 topY 出現在畫面距頂約 CAMERA_TOP_PADDING 的位置
+    // 只追隨「已堆穩塔頂」，排除剛放掉、正在空中的那顆 —— 不然球一放手
+    // topScoopY 就從 ~636 暴跳到 ~80（投放器高度），相機跟著抖。
+    const topY = Physics.topSettledScoopY(lastScoredScoop);
     const desired = topY - GAME_CONFIG.CAMERA_TOP_PADDING;
-    // 但鏡頭最低不低於初始（不要往下露出地板下方）
-    const minCam = 0; // 不限制下界更好觀察；保留 0 起始
-    cameraTargetY = Math.min(desired, minCam);
-    cameraY += (cameraTargetY - cameraY) * GAME_CONFIG.CAMERA_LERP;
+    cameraTargetY = Math.min(desired, 0);
+    // 平滑 lerp + 每幀位移上限，雙保險避免畫面跳動
+    const delta = (cameraTargetY - cameraY) * GAME_CONFIG.CAMERA_LERP;
+    const clamped = Math.max(-GAME_CONFIG.CAMERA_MAX_DELTA,
+                              Math.min(GAME_CONFIG.CAMERA_MAX_DELTA, delta));
+    cameraY += clamped;
   }
 
   function getState()   { return state; }

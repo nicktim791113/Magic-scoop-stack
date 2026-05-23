@@ -12,11 +12,13 @@ const GAME_CONFIG = {
 
   // 冰淇淋球
   SCOOP_RADIUS: 26,
-  SCOOP_RESTITUTION: 0.08,   // 彈性低 → 不會彈跳
+  SCOOP_RESTITUTION: 0.05,   // 彈性低 → 不會彈跳
   SCOOP_FRICTION: 0.95,      // 摩擦高 → 咬得住下一顆
   SCOOP_FRICTION_STATIC: 1.0,
+  SCOOP_FRICTION_AIR: 0.02,  // 空氣阻力 → 讓掉落不會無限加速
   SCOOP_DENSITY: 0.0018,     // 密度 → 重量與慣性
   SCOOP_SLOP: 0.02,
+  // 註：scoop 的 inertia 在 physics.js 鎖成 Infinity，球不會自轉/滾動
 
   // 投放器（頂端左右擺盪）
   DROPPER_Y: 80,
@@ -34,7 +36,8 @@ const GAME_CONFIG = {
   // 相機
   CAMERA_TOP_PADDING: 280,   // 鏡頭頂端與最高球距離
   CAMERA_BOTTOM_PADDING: 180,
-  CAMERA_LERP: 0.12,         // 鏡頭平滑追隨
+  CAMERA_LERP: 0.06,         // 鏡頭平滑追隨（越小越柔和）
+  CAMERA_MAX_DELTA: 6,       // 每幀相機最大位移上限（像素）→ 防止暴衝
 
   // 失敗判定
   FALL_OUT_OFFSET: 120,      // 球 y 超過鏡頭下緣多少視為掉光

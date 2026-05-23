@@ -79,12 +79,25 @@ const Physics = (() => {
       frictionStatic: GAME_CONFIG.SCOOP_FRICTION_STATIC,
       density: GAME_CONFIG.SCOOP_DENSITY,
       slop: GAME_CONFIG.SCOOP_SLOP,
+      frictionAir: GAME_CONFIG.SCOOP_FRICTION_AIR,
       label: 'scoop',
       render: { visible: false },
     });
+    // 冰淇淋球不會自轉 — 鎖死慣性，碰撞後不會像保齡球滾來滾去
+    Body.setInertia(body, Infinity);
     body.flavor = flavor;
     body.bornAt = performance.now();
     return body;
+  }
+
+  // 已堆穩塔頂的 y — 排除指定的 body（通常是空中那顆，避免相機暴衝）
+  function topSettledScoopY(exclude) {
+    let minY = cone.topY;
+    for (const s of scoops) {
+      if (s === exclude) continue;
+      if (s.position.y < minY) minY = s.position.y;
+    }
+    return minY;
   }
 
   function addScoop(scoop) {
@@ -150,7 +163,7 @@ const Physics = (() => {
   return {
     init, step, reset,
     createScoop, addScoop,
-    checkFallOut, topScoopY, highestScoop, isAllSettled,
+    checkFallOut, topScoopY, topSettledScoopY, highestScoop, isAllSettled,
     getScoops, getCone, getWorld,
     set onDropOut(fn) { onDropOut = fn; },
   };
