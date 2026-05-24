@@ -2,7 +2,7 @@
 // Service Worker — 把遊戲資源快取起來，PWA 離線也能玩
 // 改版時把 CACHE 版本號 +1，使用者打開就會抓到新檔
 // ============================================================
-const CACHE = 'magic-scoop-v2';
+const CACHE = 'magic-scoop-v3';
 const ASSETS = [
   './',
   './index.html',

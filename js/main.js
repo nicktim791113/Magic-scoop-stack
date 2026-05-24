@@ -109,41 +109,85 @@
     ctx.fillRect(0, cy + c.ch, W, H);
   }
 
-  function drawScoop(body) {
+  function drawScoop(body, opts = {}) {
     const camY = Game.getCameraY();
     const x = body.position.x;
     const y = body.position.y - camY;
     const r = GAME_CONFIG.SCOOP_RADIUS;
-    const a = body.angle;
     const f = body.flavor || GAME_CONFIG.FLAVORS[0];
+
+    // 飛行中 vs 落定：用速度判定。落定後畫成軟塌 dollop（橫向略寬、
+    // 底部小垂滴）而不是完美圓球——冰淇淋是軟的，碰到東西會塌一點
+    const vx = (body.velocity && body.velocity.x) || 0;
+    const vy = (body.velocity && body.velocity.y) || 0;
+    const speed = Math.hypot(vx, vy);
+    // 沒 velocity 屬性 = dropper 預覽用的假 body → 一律當作空中圓球
+    const inAir = !body.velocity || speed > 0.6;
+
+    // squash 形變參數
+    const sx = inAir ? 0.97 : 1.10;   // 落定後橫向稍寬
+    const sy = inAir ? 1.04 : 0.86;   // 落定後縱向壓扁
+    const rx = r * sx;
+    const ry = r * sy;
 
     ctx.save();
     ctx.translate(x, y);
 
-    // 陰影
+    // 陰影（橢圓，跟著形變）
     ctx.fillStyle = GAME_CONFIG.COLORS.SHADOW;
-    ctx.beginPath(); ctx.arc(2, 3, r, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(2, 3 + (1 - sy) * r * 0.6, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    ctx.rotate(a);
-
-    // 球體漸層
-    const g = ctx.createRadialGradient(-r * 0.4, -r * 0.4, r * 0.2, 0, 0, r);
+    // 主體漸層
+    const g = ctx.createRadialGradient(-rx * 0.4, -ry * 0.45, r * 0.2, 0, 0, Math.max(rx, ry));
     g.addColorStop(0, f.hi);
     g.addColorStop(1, f.body);
     ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+
+    // dollop 輪廓：橢圓 + 落定時底部多兩坨小垂滴
+    ctx.beginPath();
+    ctx.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (!inAir) {
+      // 兩坨小「融化」垂滴在底邊偏下，模擬軟冰淇淋黏住下方那顆的感覺
+      const dripR1 = r * 0.26;
+      const dripR2 = r * 0.18;
+      const dripY  = ry * 0.78;
+      ctx.beginPath();
+      ctx.arc(-rx * 0.32, dripY, dripR1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc( rx * 0.42, dripY + r * 0.05, dripR2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // 飛行中：底部拉出一條小尾巴（像水滴），更有「正在掉」的感覺
+      ctx.beginPath();
+      ctx.moveTo(-rx * 0.35, ry * 0.55);
+      ctx.quadraticCurveTo(0, ry * 1.18, rx * 0.35, ry * 0.55);
+      ctx.fill();
+    }
+
+    // 頂端小尖（剛挖出來的軟冰造型）
+    ctx.beginPath();
+    ctx.moveTo(-rx * 0.22, -ry * 0.78);
+    ctx.quadraticCurveTo(0, -ry * 1.20, rx * 0.22, -ry * 0.78);
+    ctx.fill();
 
     // 高光
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.beginPath(); ctx.arc(-r * 0.4, -r * 0.45, r * 0.22, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-rx * 0.4, -ry * 0.45, rx * 0.22, ry * 0.18, 0, 0, Math.PI * 2);
+    ctx.fill();
 
-    // 小巧克力豆 / 配料
+    // 小巧克力豆/配料（不旋轉）
     ctx.fillStyle = 'rgba(0,0,0,0.18)';
     for (let i = 0; i < 3; i++) {
-      const ang = (i / 3) * Math.PI * 2 + (body.id % 7);
+      const ang = (i / 3) * Math.PI * 2 + ((body.id || 0) % 7);
       const rr = r * 0.55;
       ctx.beginPath();
-      ctx.arc(Math.cos(ang) * rr, Math.sin(ang) * rr, 1.6, 0, Math.PI * 2);
+      ctx.arc(Math.cos(ang) * rr * sx, Math.sin(ang) * rr * sy, 1.6, 0, Math.PI * 2);
       ctx.fill();
     }
 
