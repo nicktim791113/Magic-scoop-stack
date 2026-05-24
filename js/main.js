@@ -276,10 +276,13 @@
   // ---------------- 輸入 ----------------
   function action() {
     Audio.unlock();
-    if (Game.getState() === Game.STATE.PLAYING && Dropper.isArmed()) {
-      Audio.play('drop');
-    }
+    const wasPlaying = Game.getState() === Game.STATE.PLAYING;
+    if (wasPlaying && Dropper.isArmed()) Audio.play('drop');
     Game.handleAction();
+    // 剛從 start/over 切到 playing → 新回合，HUD 分數歸零
+    if (!wasPlaying && Game.getState() === Game.STATE.PLAYING) {
+      elScore.textContent = '0';
+    }
   }
 
   window.addEventListener('keydown', e => {
